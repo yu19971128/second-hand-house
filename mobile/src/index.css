@@ -1,0 +1,80 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f5f5f5;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.page-container {
+  padding-bottom: 60px;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.house-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.house-card-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background: #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 14px;
+}
+
+.house-card-info {
+  padding: 12px;
+}
+
+.house-price {
+  color: #f40;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.house-price span {
+  font-size: 13px;
+  font-weight: normal;
+  color: #999;
+}
+
+.house-title {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 6px 0 4px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.house-meta {
+  font-size: 12px;
+  color: #999;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: #fff3e0;
+  color: #f57c00;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
