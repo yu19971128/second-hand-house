@@ -6,6 +6,8 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const housesRoutes = require('./routes/houses');
 const adminRoutes = require('./routes/admin');
+const appointmentsRoutes = require('./routes/appointments');
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,6 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/houses', housesRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/appointments', appointmentsRoutes);
 
 // 健康检查
 app.get('/api/health', (req, res) => {

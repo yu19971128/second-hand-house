@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { NavBar, Toast, Button, Image, Swiper, Tag, Skeleton } from 'antd-mobile';
+import { NavBar, Toast, Button, Image, Swiper, Tag, Skeleton, Popup, DatePicker, Input } from 'antd-mobile';
 import request from '../utils/request';
 
 export default function HouseDetail() {
@@ -11,6 +11,11 @@ export default function HouseDetail() {
   const [loading, setLoading] = useState(true);
   const [favorited, setFavorited] = useState(false);
   const user = JSON.parse(localStorage.getItem('user') || 'null');
+  // 预约弹窗相关状态
+  const [appointVisible, setAppointVisible] = useState(false);
+  const [appointTime, setAppointTime] = useState(null);
+  const [remark, setRemark] = useState('');
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -36,6 +41,37 @@ export default function HouseDetail() {
       const res = await request.post(`/houses/${id}/favorite`);
       setFavorited(res.data.favorited);
       Toast.show({ content: res.data.message, icon: 'success' });
+    } catch (e) {
+      Toast.show({ content: e.message, icon: 'fail' });
+    }
+  };
+
+  const handleAppointment = () => {
+    if (!user) {
+      Toast.show({ content: '请先登录', icon: 'fail' });
+      navigate('/login');
+      return;
+    }
+    // 打开预约弹窗
+    setAppointVisible(true);
+  };
+
+  // 确认预约
+  const confirmAppointment = async () => {
+    if (!appointTime) {
+      Toast.show({ content: '请选择预约时间', icon: 'fail' });
+      return;
+    }
+    try {
+      const res = await request.post('/appointments', {
+        house_id: id,
+        appoint_time: appointTime.toISOString().split('T')[0],
+        remark: remark || '预约看房',
+      });
+      Toast.show({ content: res.data.message, icon: 'success' });
+      setAppointVisible(false);
+      setAppointTime(null);
+      setRemark('');
     } catch (e) {
       Toast.show({ content: e.message, icon: 'fail' });
     }
@@ -128,15 +164,77 @@ export default function HouseDetail() {
 
       {/* 底部操作栏 */}
       <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, background: '#fff', padding: '12px 16px', display: 'flex', gap: 12, borderTop: '1px solid #f0f0f0' }}>
-        <Button block onClick={handleFavorite} style={{ flex: 1 }}>
+        <Button onClick={handleFavorite} style={{ flex: 1 }}>
           {favorited ? '❤️ 已收藏' : '🤍 收藏'}
         </Button>
+        <Button color="primary" style={{ flex: 1 }} onClick={handleAppointment}>
+          📅 预约看房
+        </Button>
         {house.publisher_phone && (
-          <Button block color="primary" style={{ flex: 2 }} onClick={() => window.open(`tel:${house.publisher_phone}`)}>
+          <Button color="success" style={{ flex: 1 }} onClick={() => window.open(`tel:${house.publisher_phone}`)}>
             📞 联系中介
           </Button>
         )}
       </div>
+
+      {/* 预约看房弹窗 */}
+      <Popup
+        visible={appointVisible}
+        onMaskClick={() => setAppointVisible(false)}
+        bodyStyle={{ padding: 20, borderRadius: '8px 8px 0 0' }}
+      >
+        <div style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>预约看房</div>
+        
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>预约时间 *</div>
+          <DatePicker
+            visible={datePickerVisible}
+            value={appointTime}
+            // onChange={val => {
+            //   setAppointTime(val);
+            //   setDatePickerVisible(false);
+            // }}
+            onConfirm={val => {
+              setAppointTime(val);
+              setDatePickerVisible(false);
+            }}
+            onClose={() => setDatePickerVisible(false)}
+            min={new Date()}
+            title="选择预约时间"
+          >
+            {(value) => (
+              <div
+                onClick={() => setDatePickerVisible(true)}
+                style={{
+                  padding: '10px 12px',
+                  background: '#f5f5f5',
+                  borderRadius: 6,
+                  fontSize: 14,
+                  color: value ? '#333' : '#999',
+                  cursor: 'pointer'
+                }}
+              >
+                {value ? value.toLocaleDateString() : '请选择日期'}
+              </div>
+            )}
+          </DatePicker>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>备注</div>
+          <Input
+            value={remark}
+            onChange={setRemark}
+            placeholder="请输入备注信息（选填）"
+            style={{ background: '#f5f5f5', borderRadius: 6 }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', gap: 12 }}>
+          <Button onClick={() => setAppointVisible(false)} style={{ flex: 1 }}>取消</Button>
+          <Button color="primary" onClick={confirmAppointment} style={{ flex: 1 }}>确定预约</Button>
+        </div>
+      </Popup>
     </div>
   );
 }
